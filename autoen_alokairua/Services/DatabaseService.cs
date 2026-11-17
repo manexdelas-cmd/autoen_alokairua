@@ -6,16 +6,27 @@ using autoen_alokairua.Models;
 
 namespace autoen_alokairua.Services
 {
+    /// <summary>
+    /// SQLite datu-basearekin harremanetan jartzeko zerbitzu nagusia.
+    /// Ibilgailuen, bezeroen eta alokairuen CRUD (Sortu, Irakurri, Eguneratu, Ezabatu) eragiketak kudeatzen ditu.
+    /// </summary>
     public class DatabaseService
     {
+        // Datu-base fitxategiaren kokapen fisikoa gordetzen duen bidea
         private readonly string _dbPath;
 
+        /// <summary>
+        /// Eraikitzailea. Datu-basearen bidea zehazten du eta taulak hasieratzen ditu.
+        /// </summary>
         public DatabaseService()
         {
             _dbPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "alokairuak.db");
             InicializarBaseDeDatos();
         }
 
+        /// <summary>
+        /// Datu-baseko taulak sortzen ditu existitzen ez badira eta hasierako proba-datuak txertatzen ditu.
+        /// </summary>
         private void InicializarBaseDeDatos()
         {
             using var connection = new SqliteConnection($"Data Source={_dbPath}");
@@ -60,7 +71,14 @@ namespace autoen_alokairua.Services
             cmd.ExecuteNonQuery();
         }
 
-        // --- IBILGAILUAK (VEHÍCULOS) ---
+        // ==========================================
+        // IBILGAILUAK (VEHÍCULOS)
+        // ==========================================
+
+        /// <summary>
+        /// Datu-basean erregistratutako ibilgailu guztien zerrenda eskuratzen du.
+        /// </summary>
+        /// <returns>Autoak motako objektuen zerrenda.</returns>
         public List<Autoak> GetVehiculos()
         {
             var list = new List<Autoak>();
@@ -85,6 +103,10 @@ namespace autoen_alokairua.Services
             return list;
         }
 
+        /// <summary>
+        /// Ibilgailu berri bat txertatzen du datu-basean.
+        /// </summary>
+        /// <param name="a">Gorde beharreko ibilgailuaren datuak dituen objektua.</param>
         public void InsertarVehiculo(Autoak a)
         {
             using var connection = new SqliteConnection($"Data Source={_dbPath}");
@@ -103,6 +125,10 @@ namespace autoen_alokairua.Services
             command.ExecuteNonQuery();
         }
 
+        /// <summary>
+        /// Existitzen den ibilgailu baten datuak eguneratzen ditu matrikularen arabera.
+        /// </summary>
+        /// <param name="a">Datu eguneratuak dituen ibilgailu objektua.</param>
         public void ActualizarVehiculo(Autoak a)
         {
             using var connection = new SqliteConnection($"Data Source={_dbPath}");
@@ -122,6 +148,10 @@ namespace autoen_alokairua.Services
             command.ExecuteNonQuery();
         }
 
+        /// <summary>
+        /// Ibilgailu bat datu-basetik ezabatzen du bere matrikula erabiliz.
+        /// </summary>
+        /// <param name="matrikula">Ezabatu beharreko ibilgailuaren matrikula.</param>
         public void EliminarVehiculo(string matrikula)
         {
             using var connection = new SqliteConnection($"Data Source={_dbPath}");
@@ -132,7 +162,14 @@ namespace autoen_alokairua.Services
             command.ExecuteNonQuery();
         }
 
-        // --- BEZEROAK (CLIENTES) ---
+        // ==========================================
+        // BEZEROAK (CLIENTES)
+        // ==========================================
+
+        /// <summary>
+        /// Datu-basean dauden bezero guztien zerrenda eskuratzen du.
+        /// </summary>
+        /// <returns>Bezeroa motako objektuen zerrenda.</returns>
         public List<Bezeroa> GetClientes()
         {
             var list = new List<Bezeroa>();
@@ -155,6 +192,10 @@ namespace autoen_alokairua.Services
             return list;
         }
 
+        /// <summary>
+        /// Bezero berri bat txertatzen du datu-basean.
+        /// </summary>
+        /// <param name="c">Gorde beharreko bezeroaren datuak dituen objektua.</param>
         public void InsertarCliente(Bezeroa c)
         {
             using var connection = new SqliteConnection($"Data Source={_dbPath}");
@@ -171,6 +212,10 @@ namespace autoen_alokairua.Services
             command.ExecuteNonQuery();
         }
 
+        /// <summary>
+        /// Bezero baten datu pertsonalak eguneratzen ditu bere NANaren arabera.
+        /// </summary>
+        /// <param name="c">Datu eguneratuak dituen bezero objektua.</param>
         public void ActualizarCliente(Bezeroa c)
         {
             using var connection = new SqliteConnection($"Data Source={_dbPath}");
@@ -188,6 +233,10 @@ namespace autoen_alokairua.Services
             command.ExecuteNonQuery();
         }
 
+        /// <summary>
+        /// Bezero bat datu-basetik ezabatzen du bere NAN zenbakia erabiliz.
+        /// </summary>
+        /// <param name="nan">Ezabatu beharreko bezeroaren NAN zenbakia.</param>
         public void EliminarCliente(string nan)
         {
             using var connection = new SqliteConnection($"Data Source={_dbPath}");
@@ -198,9 +247,14 @@ namespace autoen_alokairua.Services
             command.ExecuteNonQuery();
         }
 
-        // --- ALOKAIRUAK (ALQUILERES) ---
+        // ==========================================
+        // ALOKAIRUAK (ALQUILERES)
+        // ==========================================
 
-        // METODO NUEVO PARA TRAER TODOS LOS ALQUILERES
+        /// <summary>
+        /// Egindako alokairu guztien zerrenda osoa eskuratzen du, ibilgailuaren marka eta modeloarekin bateratuta.
+        /// </summary>
+        /// <returns>Alokairua motako objektuen zerrenda.</returns>
         public List<Alokairua> GetTodosLosAlquileres()
         {
             var list = new List<Alokairua>();
@@ -208,6 +262,7 @@ namespace autoen_alokairua.Services
             connection.Open();
             var command = connection.CreateCommand();
 
+            // Alokairuak eta Ibilgailuak taulak elkartzen ditu datu osoak lortzeko
             command.CommandText = @"
                 SELECT a.Id, a.BezeroaNAN, a.IbilgailuaMatrikula, a.HasieraData, a.AmaieraData, a.PrezioOsoa, i.Marka, i.Modeloa 
                 FROM Alokairuak a JOIN Ibilgailuak i ON a.IbilgailuaMatrikula = i.Matrikula;";
@@ -229,6 +284,11 @@ namespace autoen_alokairua.Services
             return list;
         }
 
+        /// <summary>
+        /// Bezero jakin batek egindako alokairuen historiala eskuratzen du bere NANaren arabera.
+        /// </summary>
+        /// <param name="nan">Bezeroaren NAN zenbakia.</param>
+        /// <returns>Bezero horren alokairuen zerrenda.</returns>
         public List<Alokairua> GetAlquileresDeCliente(string nan)
         {
             var list = new List<Alokairua>();
@@ -256,6 +316,10 @@ namespace autoen_alokairua.Services
             return list;
         }
 
+        /// <summary>
+        /// Alokairu berri bat erregistratzen du datu-basean eta alokatutako ibilgailuaren egoera 'Alokatuta' gisa eguneratzen du.
+        /// </summary>
+        /// <param name="a">Gorde beharreko alokairuaren datuak dituen objektua.</param>
         public void InsertarAlquiler(Alokairua a)
         {
             using var connection = new SqliteConnection($"Data Source={_dbPath}");
