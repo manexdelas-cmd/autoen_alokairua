@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="autoen_alokairua.Alokairuak"
+             Shell.NavBarIsVisible="False"
+             BackgroundColor="#F1F5F9">
+   
+
+    <Grid ColumnDefinitions="420, *" ColumnSpacing="24" Padding="24">
+
+        <!-- EZKERREKO PANELA: Formularioa -->
+        <Border Grid.Column="0" Stroke="Transparent" StrokeShape="RoundRectangle 16" BackgroundColor="White" Padding="28" VerticalOptions="Start">
+            <Border.Shadow>
+                <Shadow Brush="#94A3B8" Offset="0,6" Radius="20" Opacity="0.1" />
+            </Border.Shadow>
+
+            <VerticalStackLayout Spacing="20">
+                <Label Text="Alokairu Berria" FontSize="24" FontAttributes="Bold" TextColor="#0F172A" Margin="0,0,0,8" />
+
+                <!-- Bezeroa -->
+                <VerticalStackLayout Spacing="6">
+                    <Label Text="BEZEROA (NAN)" FontSize="11" TextColor="#64748B" FontAttributes="Bold" />
+                    <Border Stroke="#E2E8F0" StrokeThickness="1" StrokeShape="RoundRectangle 8" BackgroundColor="#F8FAFC">
+
+                        <!-- Hemos quitado el Title="Aukeratu bat..." de esta línea principal -->
+                        <Picker x:Name="pickerCliente" TextColor="#0F172A" TitleColor="#94A3B8" Margin="8,0" ItemDisplayBinding="{Binding NombreCompleto}">
+                            <Picker.Triggers>
+                                <!-- Este Trigger pone el título SOLO cuando está vacío -->
+                                <Trigger TargetType="Picker" Property="SelectedIndex" Value="-1">
+                                    <Setter Property="Title" Value="Aukeratu bat..." />
+                                </Trigger>
+                            </Picker.Triggers>
+                        </Picker>
+
+                    </Border>
+                </VerticalStackLayout>
+
+                <!-- Ibilgailua -->
+                <VerticalStackLayout Spacing="6">
+                    <Label Text="IBILGAILUA" FontSize="11" TextColor="#64748B" FontAttributes="Bold" />
+                    <Border Stroke="#E2E8F0" StrokeThickness="1" StrokeShape="RoundRectangle 8" BackgroundColor="#F8FAFC">
+
+                        <Picker x:Name="pickerVehiculo" TextColor="#0F172A" TitleColor="#94A3B8" Margin="8,0" ItemDisplayBinding="{Binding NombreCompleto}">
+                            <Picker.Triggers>
+                                <Trigger TargetType="Picker" Property="SelectedIndex" Value="-1">
+                                    <Setter Property="Title" Value="Aukeratu bat..." />
+                                </Trigger>
+                            </Picker.Triggers>
+                        </Picker>
+
+                    </Border>
+                </VerticalStackLayout>
+
+                <!-- Datak (Grid batean paraleloan jartzeko) -->
+                <Grid ColumnDefinitions="*, *" ColumnSpacing="16">
+                    <VerticalStackLayout Grid.Column="0" Spacing="6">
+                        <Label Text="HASIERA DATA" FontSize="11" TextColor="#64748B" FontAttributes="Bold" />
+                        <Border Stroke="#E2E8F0" StrokeThickness="1" StrokeShape="RoundRectangle 8" BackgroundColor="#F8FAFC">
+                            <DatePicker x:Name="dpInicio" TextColor="#0F172A" Margin="8,0" />
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Grid.Column="1" Spacing="6">
+                        <Label Text="AMAIERA DATA" FontSize="11" TextColor="#64748B" FontAttributes="Bold" />
+                        <Border Stroke="#E2E8F0" StrokeThickness="1" StrokeShape="RoundRectangle 8" BackgroundColor="#F8FAFC">
+                            <DatePicker x:Name="dpFin" TextColor="#0F172A" Margin="8,0" />
+                        </Border>
+                    </VerticalStackLayout>
+                </Grid>
+
+                <BoxView HeightRequest="1" Color="#E2E8F0" Margin="0,8" />
+
+                <!-- Prezio Kalkulatua (Destacado) -->
+                <Border Stroke="Transparent" BackgroundColor="#F0FDF4" StrokeShape="RoundRectangle 12" Padding="16">
+                    <Grid ColumnDefinitions="*, Auto">
+                        <Label Grid.Column="0" Text="PREZIO OSOA:" FontSize="13" TextColor="#166534" FontAttributes="Bold" VerticalOptions="Center" />
+                        <!-- Aquí mantengo tu x:Name para que C# inserte el texto -->
+                        <Label Grid.Column="1" x:Name="lblPrecioCalculado" Text="0.00 €" FontSize="22" FontAttributes="Bold" TextColor="#15803D" VerticalOptions="Center" />
+                    </Grid>
+                </Border>
+
+                <!-- Botoia -->
+                <Button Text="Gorde Alokairua" BackgroundColor="#1E5280" TextColor="White" CornerRadius="10" HeightRequest="52" FontAttributes="Bold" Margin="0,12,0,0" Clicked="OnGordeAlokairuaClicked">
+                    <Button.Shadow>
+                        <Shadow Brush="#1E5280" Offset="0,4" Radius="10" Opacity="0.25" />
+                    </Button.Shadow>
+                </Button>
+            </VerticalStackLayout>
+        </Border>
+
+        <!-- ESKUINEKO PANELA: Zerrenda -->
+        <Border Grid.Column="1" Stroke="Transparent" StrokeShape="RoundRectangle 16" BackgroundColor="White" Padding="32">
+            <Border.Shadow>
+                <Shadow Brush="#94A3B8" Offset="0,8" Radius="24" Opacity="0.12" />
+            </Border.Shadow>
+
+            <VerticalStackLayout Spacing="20">
+                <Label Text="Erregistratutako Alokairuak" FontSize="22" FontAttributes="Bold" TextColor="#0F172A" Margin="0,0,0,8" />
+
+                <!-- Alokairuen Zerrenda -->
+                <CollectionView x:Name="listaAlquileres" SelectionMode="None">
+                    <CollectionView.ItemsLayout>
+                        <LinearItemsLayout Orientation="Vertical" ItemSpacing="12" />
+                    </CollectionView.ItemsLayout>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <!-- Txartel bakoitza Hover efektuarekin -->
+                            <Border StrokeShape="RoundRectangle 12" Padding="20" StrokeThickness="1">
+                                <Border.Shadow>
+                                    <Shadow Brush="#94A3B8" Offset="0,2" Radius="6" Opacity="0.08" />
+                                </Border.Shadow>
+
+                                <VisualStateManager.VisualStateGroups>
+                                    <VisualStateGroup x:Name="CommonStates">
+                                        <VisualState x:Name="Normal">
+                                            <VisualState.Setters>
+                                                <Setter Property="BackgroundColor" Value="White" />
+                                                <Setter Property="Stroke" Value="#E2E8F0" />
+                                            </VisualState.Setters>
+                                        </VisualState>
+                                        <VisualState x:Name="PointerOver">
+                                            <VisualState.Setters>
+                                                <Setter Property="BackgroundColor" Value="#F8FAFC" />
+                                                <Setter Property="Stroke" Value="#CBD5E1" />
+                                            </VisualState.Setters>
+                                        </VisualState>
+                                    </VisualStateGroup>
+                                </VisualStateManager.VisualStateGroups>
+
+                                <Grid ColumnDefinitions="*, Auto">
+
+                                    <!-- Ezkerrean: Ibilgailua eta Bezeroaren NAN -->
+                                    <VerticalStackLayout Grid.Column="0" Spacing="6" VerticalOptions="Center">
+                                        <Label Text="{Binding IbilgailuaMatrikula, StringFormat='Ibilgailua: {0}'}" FontAttributes="Bold" FontSize="16" TextColor="#0F172A" />
+                                        <Label Text="{Binding BezeroaNAN, StringFormat='Bezeroa (NAN): {0}'}" FontSize="13" TextColor="#64748B" />
+                                    </VerticalStackLayout>
+
+                                    <!-- Eskuinean: Prezioa eta Datak -->
+                                    <VerticalStackLayout Grid.Column="1" Spacing="4" HorizontalOptions="End" VerticalOptions="Center">
+                                        <Label Text="{Binding PrezioOsoa, StringFormat='{0:F2} €'}" FontAttributes="Bold" FontSize="20" TextColor="#15803D" HorizontalOptions="End" />
+
+                                        <HorizontalStackLayout Spacing="6" HorizontalOptions="End">
+                                            <Label Text="{Binding HasieraData}" FontSize="12" TextColor="#64748B" />
+                                            <Label Text="➝" FontSize="12" TextColor="#94A3B8" />
+                                            <Label Text="{Binding AmaieraData}" FontSize="12" TextColor="#64748B" />
+                                        </HorizontalStackLayout>
+                                    </VerticalStackLayout>
+
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </VerticalStackLayout>
+        </Border>
+    </Grid>
+</ContentPage>

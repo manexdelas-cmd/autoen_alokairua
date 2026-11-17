@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="autoen_alokairua.Bezeroak"
+             Shell.NavBarIsVisible="False"
+             BackgroundColor="#F1F5F9">
+
+    <!-- Egitura nagusia: Bi zutabetan banatuta (ezkerreko zerrenda eta eskuineko fitxa) -->
+    <Grid ColumnDefinitions="380, *" ColumnSpacing="24" Padding="24">
+
+        
+        <!-- EZKERREKO PANELA (Bilatzailea eta Zerrenda)-->
+        
+        <Grid Grid.Column="0" RowDefinitions="Auto, Auto, *" RowSpacing="16">
+
+            <!-- Bezero berria gehitzeko botoia -->
+            <Button Grid.Row="0" Text="+ Gehitu Bezeroa" BackgroundColor="#1E5280" TextColor="White" CornerRadius="10" FontAttributes="Bold" Clicked="OnGehituBezeroaClicked" HeightRequest="48">
+                <Button.Shadow>
+                    <Shadow Brush="#1E5280" Offset="0,4" Radius="10" Opacity="0.25" />
+                </Button.Shadow>
+            </Button>
+
+            <!-- Bezeroak NANaren edo izenaren arabera iragazteko bilatzailea -->
+            <Border Grid.Row="1" Stroke="#E2E8F0" StrokeThickness="1" StrokeShape="RoundRectangle 10" BackgroundColor="White" HeightRequest="48">
+                <SearchBar x:Name="searchBezeroa" Placeholder="Bilatu NAN edo izena..." TextChanged="OnBuscarBezeroaChanged" VerticalOptions="Center" Margin="4,0" />
+            </Border>
+
+            <!-- Datu-basetik kargatutako bezeroen zerrenda interaktiboa -->
+            <CollectionView Grid.Row="2" x:Name="listaBezeroak" SelectionMode="Single" SelectionChanged="OnBezeroaSeleccionado">
+                <CollectionView.ItemsLayout>
+                    <LinearItemsLayout Orientation="Vertical" ItemSpacing="12" />
+                </CollectionView.ItemsLayout>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Border StrokeShape="RoundRectangle 12" Padding="16" StrokeThickness="1">
+                            <Border.Shadow>
+                                <Shadow Brush="#94A3B8" Offset="0,2" Radius="6" Opacity="0.1" />
+                            </Border.Shadow>
+
+                            <!-- Txartelaren ikusizko egoerak (Normala, Sagua gainean, Hautatuta) -->
+                            <VisualStateManager.VisualStateGroups>
+                                <VisualStateGroup x:Name="CommonStates">
+                                    <VisualState x:Name="Normal">
+                                        <VisualState.Setters>
+                                            <Setter Property="BackgroundColor" Value="White" />
+                                            <Setter Property="Stroke" Value="#E2E8F0" />
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                    <VisualState x:Name="PointerOver">
+                                        <VisualState.Setters>
+                                            <Setter Property="BackgroundColor" Value="#F8FAFC" />
+                                            <Setter Property="Stroke" Value="#CBD5E1" />
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                    <VisualState x:Name="Selected">
+                                        <VisualState.Setters>
+                                            <Setter Property="BackgroundColor" Value="#F0F9FF" />
+                                            <Setter Property="Stroke" Value="#38BDF8" />
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                </VisualStateGroup>
+                            </VisualStateManager.VisualStateGroups>
+
+                            <!-- Bezero bakoitzaren oinarrizko datuak txartelean -->
+                            <VerticalStackLayout Spacing="4">
+                                <Label Text="{Binding NombreCompleto}" FontAttributes="Bold" FontSize="16" TextColor="#0F172A" />
+                                <Label Text="{Binding NAN, StringFormat='NAN / DNI: {0}'}" FontSize="13" TextColor="#64748B" />
+                                <Label Text="{Binding Telefonoa, StringFormat='Tel: {0}'}" FontSize="13" TextColor="#64748B" />
+                            </VerticalStackLayout>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </Grid>
+
+        
+        <!-- ESKUINEKO PANELA (Xehetasunak, Edizioa eta Alokairuak) -->
+        
+        <ScrollView Grid.Column="1">
+            <VerticalStackLayout Spacing="24">
+
+                <!-- Bezeroaren fitxa pertsonala -->
+                <Border Stroke="Transparent" StrokeShape="RoundRectangle 16" BackgroundColor="White" Padding="32">
+                    <Border.Shadow>
+                        <Shadow Brush="#94A3B8" Offset="0,8" Radius="24" Opacity="0.12" />
+                    </Border.Shadow>
+
+                    <VerticalStackLayout Spacing="24">
+                        <Label Text="Aukeratu bezero bat" FontSize="26" FontAttributes="Bold" TextColor="#0F172A" Margin="0,0,0,8" />
+
+                        <!-- Datuen sareta (Irakurketa eta edizio eremuekin txandakatzeko prestatuta) -->
+                        <Grid ColumnDefinitions="*, *" RowDefinitions="Auto, Auto" RowSpacing="16" ColumnSpacing="16">
+
+                            <!-- NAN / DNI -->
+                            <Border Grid.Row="0" Grid.Column="0" Stroke="Transparent" BackgroundColor="#F8FAFC" StrokeShape="RoundRectangle 12" Padding="16">
+                                <VerticalStackLayout Spacing="4">
+                                    <Label Text="NAN / DNI" FontSize="11" TextColor="#64748B" FontAttributes="Bold" />
+                                    <Label x:Name="lblNan" Text="---" FontSize="18" FontAttributes="Bold" TextColor="#0F172A" />
+                                    <Entry x:Name="entryNan" IsVisible="False" TextColor="#0F172A" BackgroundColor="White" />
+                                </VerticalStackLayout>
+                            </Border>
+
+                            <!-- Izen-abizenak -->
+                            <Border Grid.Row="0" Grid.Column="1" Stroke="Transparent" BackgroundColor="#F8FAFC" StrokeShape="RoundRectangle 12" Padding="16">
+                                <VerticalStackLayout Spacing="4">
+                                    <Label Text="IZEN-ABIZENAK" FontSize="11" TextColor="#64748B" FontAttributes="Bold" />
+                                    <Label x:Name="lblIzenAbizenak" Text="---" FontSize="18" FontAttributes="Bold" TextColor="#0F172A" />
+                                    <Entry x:Name="entryIzenAbizenak" IsVisible="False" TextColor="#0F172A" BackgroundColor="White" />
+                                </VerticalStackLayout>
+                            </Border>
+
+                            <!-- Telefonoa -->
+                            <Border Grid.Row="1" Grid.Column="0" Stroke="Transparent" BackgroundColor="#F8FAFC" StrokeShape="RoundRectangle 12" Padding="16">
+                                <VerticalStackLayout Spacing="4">
+                                    <Label Text="TELEFONOA" FontSize="11" TextColor="#64748B" FontAttributes="Bold" />
+                                    <Label x:Name="lblTelefonoa" Text="---" FontSize="18" FontAttributes="Bold" TextColor="#0F172A" />
+                                    <Entry x:Name="entryTelefonoa" IsVisible="False" TextColor="#0F172A" BackgroundColor="White" />
+                                </VerticalStackLayout>
+                            </Border>
+
+                            <!-- Emaila -->
+                            <Border Grid.Row="1" Grid.Column="1" Stroke="Transparent" BackgroundColor="#F8FAFC" StrokeShape="RoundRectangle 12" Padding="16">
+                                <VerticalStackLayout Spacing="4">
+                                    <Label Text="EMAILA" FontSize="11" TextColor="#64748B" FontAttributes="Bold" />
+                                    <Label x:Name="lblEmaila" Text="---" FontSize="18" FontAttributes="Bold" TextColor="#0F172A" />
+                                    <Entry x:Name="entryEmaila" IsVisible="False" TextColor="#0F172A" BackgroundColor="White" />
+                                </VerticalStackLayout>
+                            </Border>
+                        </Grid>
+
+                        <BoxView HeightRequest="1" Color="#E2E8F0" Margin="0,16" />
+
+                        <!-- Ekintza botoiak: Hautatutako bezeroa editatzeko edo ezabatzeko -->
+                        <Grid ColumnDefinitions="*, *" ColumnSpacing="16">
+                            <Button x:Name="btnEditatu" Grid.Column="0" Text="Editatu" BackgroundColor="#F59E0B" TextColor="White" CornerRadius="10" HeightRequest="48" FontAttributes="Bold" Clicked="OnEditatuBezeroaClicked" />
+                            <Button x:Name="btnEzabatu" Grid.Column="1" Text="Ezabatu" BackgroundColor="#EF4444" TextColor="White" CornerRadius="10" HeightRequest="48" FontAttributes="Bold" Clicked="OnEzabatuBezeroaClicked" />
+                        </Grid>
+                    </VerticalStackLayout>
+                </Border>
+
+              
+                <!-- BEZEROAREN ALOKAIRUEN HISTORIALA -->
+                
+                <Border Stroke="Transparent" StrokeShape="RoundRectangle 16" BackgroundColor="White" Padding="32">
+                    <Border.Shadow>
+                        <Shadow Brush="#94A3B8" Offset="0,4" Radius="12" Opacity="0.08" />
+                    </Border.Shadow>
+
+                    <VerticalStackLayout Spacing="16">
+                        <Label Text="Bezeroaren alokairuak" FontSize="20" FontAttributes="Bold" TextColor="#0F172A" />
+
+                        <!-- Alokairurik ez dagoenean erakusten den abisua -->
+                        <Label x:Name="lblSinAlquileres" Text="Ez dago alokairurik erakusteko." TextColor="#94A3B8" FontAttributes="Italic" HorizontalOptions="Center" Margin="0,20,0,0" />
+
+                        <!-- Hautatutako bezeroak egindako alokairuen zerrenda -->
+                        <CollectionView x:Name="listaAlquileresCliente" IsVisible="False">
+                            <CollectionView.ItemsLayout>
+                                <LinearItemsLayout Orientation="Vertical" ItemSpacing="12" />
+                            </CollectionView.ItemsLayout>
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Stroke="#E2E8F0" StrokeShape="RoundRectangle 10" Padding="16" BackgroundColor="#F8FAFC">
+                                        <Grid ColumnDefinitions="*, Auto" RowDefinitions="Auto, Auto">
+                                            <!-- Alokatutako ibilgailuaren izena eta matrikula -->
+                                            <Label Grid.Row="0" Grid.Column="0" Text="{Binding InfoVehiculo}" FontAttributes="Bold" FontSize="16" TextColor="#0F172A" />
+
+                                            <!-- Alokairuaren hasiera eta amaiera datak -->
+                                            <HorizontalStackLayout Grid.Row="1" Grid.Column="0" Spacing="4">
+                                                <Label Text="{Binding HasieraData, StringFormat='{0} ➝ '}" FontSize="13" TextColor="#64748B" />
+                                                <Label Text="{Binding AmaieraData}" FontSize="13" TextColor="#64748B" />
+                                            </HorizontalStackLayout>
+
+                                            <!-- Alokairuaren prezio totala -->
+                                            <Label Grid.Row="0" Grid.RowSpan="2" Grid.Column="1" Text="{Binding PrezioOsoa, StringFormat='{0:F2} €'}" FontAttributes="Bold" FontSize="18" TextColor="#15803D" VerticalOptions="Center" />
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+                    </VerticalStackLayout>
+                </Border>
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>
